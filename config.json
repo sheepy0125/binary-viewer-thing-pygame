@@ -1,4 +1,14 @@
 {
-	"window_size": [800, 600],
-	"fps": 30
+	"pygame": {
+		"windowSize": [800, 600],
+		"fps": 30
+	},
+	"options": {
+		"buttonTextSize": 12,
+		"verbose": true
+	},
+	"paths": {
+		"fontPath": "Assets/Terminus.ttf",
+		"buttonImgPath": "Assets/button.png"
+	}
 }

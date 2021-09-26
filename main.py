@@ -8,31 +8,10 @@ Created by Sheepy0125
 ### Setup ###
 #############
 # Import
-import pygame
-from json import load
-from tools import Logger
+from setup import CONFIG, pygame, window, clock
+from tools import Logger, check_running_by_self
+from pygame_tools import Text, Button
 
-# Configuration
-with open("config.json") as config_file:
-    CONFIG: dict = load(config_file)
-del load
-
-# Check if configuration is okay
-try:
-    assert (
-        CONFIG["window_size"][0] >= 800 and CONFIG["window_size"][1] >= 600
-    ) is not False, "Window size invalid! Must be 800x600 or more!"
-    assert CONFIG["fps"] is int, "FPS must be a valid integer!"
-
-except Exception as error:
-    Logger.log_error(error)
-    exit(1)
-
-# Setup Pygame
-pygame.display.set_caption("Binary Viewer - Created by Sheepy")
-window: pygame.Surface = pygame.display.set_mode(CONFIG["window_size"])
-clock = pygame.time.Clock()
-pygame.init()
 
 ###############
 ### Classes ###
@@ -44,6 +23,10 @@ class BinaryInput:
         self.x = position[0]
         self.y = position[1]
         self.value = default_value
+
+    def update():
+        """Show the input"""
+        pass
 
 
 class AllBinaryInputs:
@@ -63,15 +46,32 @@ class AllBinaryInputs:
 ### Main ###
 ############
 def main():
+    center_x: int = CONFIG["pygame"]["window_size"][0] // 2
+
+    menu_widgets: list = [
+        Text(
+            "Binary Viewer - Created by Sheepy",
+            text_pos=(center_x, 50),
+            font_size=16,
+            font_color="blue",
+        ),
+        Button(
+            button_pos=(center_x, 150), button_size=(300, 50), button_text="Convert"
+        ),
+    ]
+
     while True:
         window.fill("gray")
 
+        for widget in menu_widgets:
+            widget.draw()
+
         pygame.display.flip()
-        clock.tick(CONFIG["fps"])
+        clock.tick(CONFIG["pygame"]["fps"])
 
 
 ###########
 ### Run ###
 ###########
-if __name__ == "__main__":
+if check_running_by_self(__name__, __file__, supposed_to=True):
     main()
