@@ -28,15 +28,15 @@ class Text:
     def __init__(
         self,
         text_to_display: str,
-        text_pos: tuple,
-        font_size: int,
-        font_color: Union[str, tuple] = "white",
+        pos: tuple,
+        size: int,
+        color: Union[str, tuple] = "white",
     ) -> None:
         # Create text
         self.text_surf: Surface = pygame.font.Font(
-            CONFIG["paths"]["font_path"], font_size
-        ).render(text_to_display, True, font_color)
-        self.text_rect: pygame.Rect = self.text_surf.get_rect(center=text_pos)
+            CONFIG["paths"]["font_path"], size
+        ).render(text_to_display, True, color)
+        self.text_rect: pygame.Rect = self.text_surf.get_rect(center=pos)
 
     def draw(self):
         window.blit(self.text_surf, self.text_rect)
@@ -46,28 +46,28 @@ class Button:
     """Display a button for Pygame"""
 
     def __init__(
-        self, button_pos: tuple, button_size: tuple, button_text: Union[str, None]
+        self,
+        pos: tuple,
+        size: tuple,
+        color: Union[str, tuple] = "white",
+        on_click: callable = lambda: Logger.warn(
+            "A button has been pressed, but nothing to do!"
+        ),
     ) -> None:
+        self.button_pos: tuple = pos
+        self.button_size: tuple = size
+        self.button_color: Union[str, tuple] = color
+        self.on_click: callable = on_click
+
         # Check if button size is too big (for fun you know)
-        if button_size > CONFIG["pygame"]["window_size"]:
+        if self.button_size > CONFIG["pygame"]["window_size"]:
             Logger.warn(
-                f"Button size exceeds window size ({button_size} vs. {window_size})!"
+                f"Button size exceeds window size ({size} vs. {CONFIG['pygame']['window_size']})!"
             )
 
-        self.button_surf: pygame.Surface = pygame.image.load(
-            CONFIG["paths"]["button_img_path"]
-        ).convert_alpha()
-        self.button_surf: pygame.Surface = pygame.transform.scale(
-            self.button_surf, button_size
+        self.button_rect: CenterRect = CenterRect(
+            center_pos=self.button_pos, size=self.button_size, color=self.button_color
         )
-        self.button_rect: pygame.Rect = self.button_surf.get_rect(center=button_pos)
-
-        # Button text (if desired)
-        self.button_text = None
-        if button_text:
-            self.button_text: Text = Text(
-                button_text, button_pos, CONFIG["options"]["button_text_size"]
-            )
 
     def check_pressed(self) -> bool:
         mouse_pos: tuple = pygame.mouse.get_pos()
@@ -76,21 +76,39 @@ class Button:
         cooldown_over: bool = self.button_cooldown_time <= pygame.time.get_ticks()
 
         if (
-            self.button_rect.collidepoint(mouse_pos)
+            self.button_rect.rect.collidepoint(mouse_pos)
             and mouse_click[0]
             and cooldown_over
         ):
             self.button_cooldown_time = (
                 pygame.time.get_ticks() + self.button_cooldown_time_ms
             )
+
+            self.on_click()
             return True
 
         return False
 
     def draw(self) -> None:
-        # Draw!
-        window.blit(self.button_surf, self.button_rect)
+        self.button_rect.draw()
 
-        # Draw text if desired
-        if self.button_text is not None:
-            self.button_text.draw()
+
+class CenterRect:
+    """A Pygame rectangle, but it is centered. Don't ask"""
+
+    def __init__(
+        self, center_pos: tuple, size: tuple, color: Union[str, tuple] = "white"
+    ) -> None:
+        self.center_pos: tuple = center_pos
+        self.size: tuple = size
+        self.color: Union[str, tuple] = color
+
+        # Get center position -> left / top positions
+        self.left: int = self.center_pos[0] - (self.size[0] * 0.5)
+        self.top: int = self.center_pos[1] - (self.size[1] * 0.5)
+
+        # Create rectangle
+        self.rect: pygame.Rect = pygame.Rect(self.left, self.top, *self.size)
+
+    def draw(self) -> None:
+        pygame.draw.rect(window, self.color, self.rect)

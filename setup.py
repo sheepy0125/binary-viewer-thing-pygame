@@ -47,6 +47,9 @@ try:
             "options": {
                 "button_text_size": int(CONFIG["options"]["buttonTextSize"]),
                 "vebose": bool(CONFIG["options"]["verbose"]),
+                "number_of_binary_inputs": int(
+                    CONFIG["options"]["numberOfBinaryInputs"]
+                ),
             },
             "paths": {
                 "font_path": CONFIG["paths"]["fontPath"],
