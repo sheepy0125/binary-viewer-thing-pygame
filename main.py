@@ -23,16 +23,14 @@ class BinaryInput:
         if CONFIG["options"]["verbose"]:
             Logger.log("Creating binary input!")
 
-        self.pos = pos
+        self.pos: tuple = pos
         self.value: int = default_value
 
         # When the value is updated, the text needs to update too
         self.text_needs_update: bool = False
 
         # Create input
-        self.input_rect: CenterRect = CenterRect(
-            center_pos=pos, size=(50, 50), color="white"
-        )
+        self.input_button: Button = Button(pos=pos, size=(50, 50), color="white")
         self.create_text()
 
     def create_text(self) -> None:
@@ -41,12 +39,20 @@ class BinaryInput:
         )
         self.text_needs_update: bool = False
 
+    def check_pressed(self) -> None:
+        if self.input_button.check_pressed():
+            self.value = int(not bool(self.value))
+            self.create_text()
+            self.input_button.button_rect.color = (
+                "green" if bool(self.value) else "white"
+            )
+
     def draw(self) -> None:
         # Text needs to be updated
         if self.text_needs_update:
             self.create_text()
 
-        self.input_rect.draw()
+        self.input_button.draw()
         self.input_text.draw()
 
 
@@ -111,13 +117,17 @@ class AllBinaryInputs:
             binary_input.set(value)
             binary_input.update()
 
-    def draw_all_inputs(self) -> None:
+    def event_handling(self) -> None:
         for binary_input in self.input_list:
-            binary_input.draw()
+            binary_input.check_pressed()
 
     def convert(self) -> None:
         if CONFIG["options"]["verbose"]:
             Logger.log(f"Converting binary inputs: {binary_digits}")
+
+    def draw_all_inputs(self) -> None:
+        for binary_input in self.input_list:
+            binary_input.draw()
 
 
 ############
@@ -169,6 +179,7 @@ def main() -> None:
             widget.draw()
 
         all_binary_inputs.draw_all_inputs()
+        all_binary_inputs.event_handling()
 
         pygame.display.flip()
         clock.tick(CONFIG["pygame"]["fps"])
