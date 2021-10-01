@@ -20,6 +20,9 @@ class BinaryInput:
     """A binary input, accepts 0 and 1"""
 
     def __init__(self, pos: tuple, default_value: int = 0) -> None:
+        if CONFIG["options"]["verbose"]:
+            Logger.log("Creating binary input!")
+
         self.pos = pos
         self.value: int = default_value
 
@@ -51,10 +54,18 @@ class AllBinaryInputs:
     """Creates and handles all binary inputs"""
 
     def __init__(self, number_of_inputs: int) -> None:
+        # TODO - use the config V
         self.number_of_inputs: int = number_of_inputs
         self.create_all_inputs()
+        self.set_all_inputs(0)
+        self.output_text: Text = Text(
+            f"{[digit for digit in self.binary_digits]}", pos=(0, 0), size=12
+        )
 
     def create_all_inputs(self) -> None:
+        if CONFIG["options"]["verbose"]:
+            Logger.log("Creating all binary inputs")
+
         self.input_list: list = []
 
         minimum_size_per_input: int = 75
@@ -83,11 +94,20 @@ class AllBinaryInputs:
                 x_offset - (minimum_size_per_input // 2) + minimum_size_per_input
             ) > CONFIG["pygame"]["window_size"][0]:
                 Logger.warn(
-                    f"Binary input number {input_number + 1}'s placement is bigger than the window size, it'll appear off screen!"
+                    f"Binary input number {input_number + 1}'s placement is bigger "
+                    + "than the window size, it'll appear off screen!"
                 )
 
     def set_all_inputs(self, value: int) -> None:
+        if CONFIG["options"]["verbose"]:
+            Logger.log(f"Setting all inputs to {value}")
+
+        self.binary_digits = [
+            0 for _ in range(self.number_of_inputs)
+        ]  # using `*` can cause weird results
+
         for binary_input in self.input_list:
+            continue
             binary_input.set(value)
             binary_input.update()
 
@@ -95,11 +115,18 @@ class AllBinaryInputs:
         for binary_input in self.input_list:
             binary_input.draw()
 
+    def convert(self) -> None:
+        if CONFIG["options"]["verbose"]:
+            Logger.log(f"Converting binary inputs: {binary_digits}")
+
 
 ############
 ### Main ###
 ############
 def main() -> None:
+    if CONFIG["options"]["verbose"]:
+        Logger.log("Running main()!")
+
     # All binary inputs
     all_binary_inputs = AllBinaryInputs(
         number_of_inputs=CONFIG["options"]["number_of_binary_inputs"]
@@ -107,18 +134,12 @@ def main() -> None:
 
     # Widgets
     center_x: int = CONFIG["pygame"]["window_size"][0] // 2
-    widgets: list = [
+    texts: list = [
         Text(
             "Binary Viewer - Created by Sheepy",
             pos=(center_x, 50),
             size=16,
             color="blue",
-        ),
-        Button(
-            pos=(center_x, CONFIG["pygame"]["window_size"][1] - 100),
-            size=(300, 50),
-            color="red",
-            on_click=lambda: all_binary_inputs.convert(),
         ),
         Text(
             "Convert",
@@ -126,11 +147,25 @@ def main() -> None:
             size=12,
         ),
     ]
+    convert_button: Button = Button(
+        pos=(center_x, CONFIG["pygame"]["window_size"][1] - 100),
+        size=(300, 50),
+        color="red",
+    )
 
-    while True:
+    running: bool = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
         window.fill("gray")
 
-        for widget in widgets:
+        convert_button.draw()
+        if convert_button.check_pressed():
+            Logger.log("Converting inputs!")
+
+        for widget in texts:
             widget.draw()
 
         all_binary_inputs.draw_all_inputs()

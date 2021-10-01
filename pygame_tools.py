@@ -50,41 +50,41 @@ class Button:
         pos: tuple,
         size: tuple,
         color: Union[str, tuple] = "white",
-        on_click: callable = lambda: Logger.warn(
-            "A button has been pressed, but nothing to do!"
-        ),
     ) -> None:
         self.button_pos: tuple = pos
         self.button_size: tuple = size
         self.button_color: Union[str, tuple] = color
-        self.on_click: callable = on_click
 
         # Check if button size is too big (for fun you know)
         if self.button_size > CONFIG["pygame"]["window_size"]:
             Logger.warn(
-                f"Button size exceeds window size ({size} vs. {CONFIG['pygame']['window_size']})!"
+                "Button size exceeds window size "
+                + f"({size} vs. {CONFIG['pygame']['window_size']})!"
             )
 
         self.button_rect: CenterRect = CenterRect(
             center_pos=self.button_pos, size=self.button_size, color=self.button_color
         )
 
+        # Cooldown stuff
+        self.button_cooldown_time_over: int = 0
+        self.button_cooldown_time_ms: int = 100
+
     def check_pressed(self) -> bool:
         mouse_pos: tuple = pygame.mouse.get_pos()
         mouse_click: tuple = pygame.mouse.get_pressed()
 
-        cooldown_over: bool = self.button_cooldown_time <= pygame.time.get_ticks()
+        cooldown_over: bool = self.button_cooldown_time_over <= pygame.time.get_ticks()
 
         if (
             self.button_rect.rect.collidepoint(mouse_pos)
             and mouse_click[0]
             and cooldown_over
         ):
-            self.button_cooldown_time = (
+            self.button_cooldown_time_over = (
                 pygame.time.get_ticks() + self.button_cooldown_time_ms
             )
 
-            self.on_click()
             return True
 
         return False
