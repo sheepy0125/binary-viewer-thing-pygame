@@ -63,7 +63,7 @@ class Button:
             )
 
         self.button_rect: CenterRect = CenterRect(
-            center_pos=self.button_pos, size=self.button_size, color=self.button_color
+            pos=self.button_pos, size=self.button_size, color=self.button_color
         )
 
         # Cooldown stuff
@@ -71,6 +71,8 @@ class Button:
         self.button_cooldown_time_ms: int = 100
 
     def check_pressed(self) -> bool:
+        """Check if the button was pressed"""
+
         mouse_pos: tuple = pygame.mouse.get_pos()
         mouse_click: tuple = pygame.mouse.get_pressed()
 
@@ -97,9 +99,9 @@ class CenterRect:
     """A Pygame rectangle, but it is centered. Don't ask"""
 
     def __init__(
-        self, center_pos: tuple, size: tuple, color: Union[str, tuple] = "white"
+        self, pos: tuple, size: tuple, color: Union[str, tuple] = "white"
     ) -> None:
-        self.center_pos: tuple = center_pos
+        self.center_pos: tuple = pos
         self.size: tuple = size
         self.color: Union[str, tuple] = color
 

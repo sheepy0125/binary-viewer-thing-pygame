@@ -48,8 +48,10 @@ def check_running_by_self(
     dunder_name: str,
     dunder_file: str,
     supposed_to: bool = False,
-    verbose: bool = False,
+    verbose: bool = False,  # TODO - verbose from config?
 ) -> None:
+    """Check if the program is running by itself or not (name is main), and log the result"""
+
     if dunder_name == "__main__":
         if supposed_to:
             if verbose:

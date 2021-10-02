@@ -34,20 +34,26 @@ class BinaryInput:
         self.create_text()
 
     def create_text(self) -> None:
+        """Create text to display the value"""
+
         self.input_text: Text = Text(
             str(self.value), pos=self.pos, size=24, color="black"
         )
         self.text_needs_update: bool = False
 
     def check_pressed(self) -> None:
+        """Check if the input has been flipped"""
+
         if self.input_button.check_pressed():
-            self.value = int(not bool(self.value))
+            self.value = int(not bool(self.value))  # Yeah, why?
             self.create_text()
             self.input_button.button_rect.color = (
                 "green" if bool(self.value) else "white"
             )
 
     def draw(self) -> None:
+        """Draw things needed for binary input"""
+
         # Text needs to be updated
         if self.text_needs_update:
             self.create_text()
@@ -69,15 +75,20 @@ class AllBinaryInputs:
         )
 
     def create_all_inputs(self) -> None:
+        """Create the binary inputs, adds it to self.input_list"""
+
         if CONFIG["options"]["verbose"]:
             Logger.log("Creating all binary inputs")
 
         self.input_list: list = []
 
+        # Hardcoded values, oh well!
         minimum_size_per_input: int = 75
         margin: int = 40
+        y_value: int = 200
 
-        # Get X values of binary inputs
+        # Get X values of binary inputs (discount CSS Flexbox)
+        # Dear future me, I'm sorry
         starting_x_offset: int = (
             CONFIG["pygame"]["window_size"][0] // (self.number_of_inputs * 2) + margin
         )
@@ -94,8 +105,10 @@ class AllBinaryInputs:
                 )
                 * input_number
             ) + starting_x_offset
-            self.input_list.append(BinaryInput(pos=(x_offset, 200)))
 
+            self.input_list.append(BinaryInput(pos=(x_offset, y_value)))
+
+            # Warning if the window size is too small, for fun you know!
             if (
                 x_offset - (minimum_size_per_input // 2) + minimum_size_per_input
             ) > CONFIG["pygame"]["window_size"][0]:
@@ -105,6 +118,8 @@ class AllBinaryInputs:
                 )
 
     def set_all_inputs(self, value: int) -> None:
+        """Set inputs globally to a single value"""
+
         if CONFIG["options"]["verbose"]:
             Logger.log(f"Setting all inputs to {value}")
 
@@ -118,14 +133,20 @@ class AllBinaryInputs:
             binary_input.update()
 
     def event_handling(self) -> None:
+        """Event handling for the inputs"""
+
         for binary_input in self.input_list:
             binary_input.check_pressed()
 
     def convert(self) -> None:
+        """Convert the inputs to a base 10 integer"""
+
         if CONFIG["options"]["verbose"]:
             Logger.log(f"Converting binary inputs: {binary_digits}")
 
     def draw_all_inputs(self) -> None:
+        """Draw all the binary inputs"""
+
         for binary_input in self.input_list:
             binary_input.draw()
 
@@ -134,6 +155,8 @@ class AllBinaryInputs:
 ### Main ###
 ############
 def main() -> None:
+    """Main program"""
+
     if CONFIG["options"]["verbose"]:
         Logger.log("Running main()!")
 
@@ -163,24 +186,33 @@ def main() -> None:
         color="red",
     )
 
+    # Main loop
     running: bool = True
     while running:
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
+        # Start drawing
+
+        # Background
         window.fill("gray")
 
+        # Binary inputs
+        all_binary_inputs.draw_all_inputs()
+        all_binary_inputs.event_handling()
+
+        # Buttons
         convert_button.draw()
         if convert_button.check_pressed():
             Logger.log("Converting inputs!")
 
+        # Widgets (draw on top of buttons for there are text widgets)
         for widget in texts:
             widget.draw()
 
-        all_binary_inputs.draw_all_inputs()
-        all_binary_inputs.event_handling()
-
+        # Finished drawing, update
         pygame.display.flip()
         clock.tick(CONFIG["pygame"]["fps"])
 
