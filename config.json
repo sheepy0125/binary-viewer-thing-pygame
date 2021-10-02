@@ -6,7 +6,8 @@
 	"options": {
 		"buttonTextSize": 12,
 		"verbose": true,
-		"numberOfBinaryInputs": 8
+		"numberOfBinaryInputs": 8,
+		"realtimeConversion": true
 	},
 	"paths": {
 		"fontPath": "Assets/Terminus.ttf",

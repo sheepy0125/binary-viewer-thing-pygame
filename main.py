@@ -41,7 +41,7 @@ class BinaryInput:
         )
         self.text_needs_update: bool = False
 
-    def check_pressed(self) -> None:
+    def check_pressed(self) -> bool:
         """Check if the input has been flipped"""
 
         if self.input_button.check_pressed():
@@ -50,6 +50,9 @@ class BinaryInput:
             self.input_button.button_rect.color = (
                 "green" if bool(self.value) else "white"
             )
+            return True
+
+        return False
 
     def draw(self) -> None:
         """Draw things needed for binary input"""
@@ -70,9 +73,7 @@ class AllBinaryInputs:
         self.number_of_inputs: int = number_of_inputs
         self.create_all_inputs()
         self.set_all_inputs(0)
-        self.output_text: Text = Text(
-            f"{[digit for digit in self.binary_digits]}", pos=(0, 0), size=12
-        )
+        self.create_output_text("0")
 
     def create_all_inputs(self) -> None:
         """Create the binary inputs, adds it to self.input_list"""
@@ -85,7 +86,7 @@ class AllBinaryInputs:
         # Hardcoded values, oh well!
         minimum_size_per_input: int = 75
         margin: int = 40
-        y_value: int = 200
+        y_value: int = 100
 
         # Get X values of binary inputs (discount CSS Flexbox)
         # Dear future me, I'm sorry
@@ -117,6 +118,15 @@ class AllBinaryInputs:
                     + "than the window size, it'll appear off screen!"
                 )
 
+    def create_output_text(self, text) -> None:
+        """Create output text"""
+        self.output_text: Text = Text(
+            text,
+            pos=(CONFIG["pygame"]["window_size"][0] // 2, 250),
+            size=24,
+            color="black",
+        )
+
     def set_all_inputs(self, value: int) -> None:
         """Set inputs globally to a single value"""
 
@@ -135,20 +145,37 @@ class AllBinaryInputs:
     def event_handling(self) -> None:
         """Event handling for the inputs"""
 
-        for binary_input in self.input_list:
-            binary_input.check_pressed()
+        for binary_input_idx in range(self.number_of_inputs):
+            binary_input: BinaryInput = self.input_list[binary_input_idx]
+
+            if binary_input.check_pressed():
+                # Binary input was pressed, change list
+                self.binary_digits[binary_input_idx] = binary_input.value
+
+            # Realtime conversion
+            if CONFIG["options"]["realtime_conversion"]:
+                self.convert()
 
     def convert(self) -> None:
         """Convert the inputs to a base 10 integer"""
 
         if CONFIG["options"]["verbose"]:
-            Logger.log(f"Converting binary inputs: {binary_digits}")
+            Logger.log(f"Converting binary inputs: {self.binary_digits}")
+
+        binary_digit_str: str = str(
+            "".join([str(binary_digit) for binary_digit in self.binary_digits])
+        )
+        normalized_num: int = int(binary_digit_str, base=2)
+
+        self.create_output_text(str(normalized_num))
 
     def draw_all_inputs(self) -> None:
         """Draw all the binary inputs"""
 
         for binary_input in self.input_list:
             binary_input.draw()
+
+        self.output_text.draw()
 
 
 ############
@@ -206,7 +233,7 @@ def main() -> None:
         # Buttons
         convert_button.draw()
         if convert_button.check_pressed():
-            Logger.log("Converting inputs!")
+            all_binary_inputs.convert()
 
         # Widgets (draw on top of buttons for there are text widgets)
         for widget in texts:

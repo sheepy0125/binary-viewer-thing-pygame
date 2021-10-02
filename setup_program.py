@@ -50,6 +50,7 @@ try:
                 "number_of_binary_inputs": int(
                     CONFIG["options"]["numberOfBinaryInputs"]
                 ),
+                "realtime_conversion": int(CONFIG["options"]["realtimeConversion"]),
             },
             "paths": {
                 "font_path": CONFIG["paths"]["fontPath"],
