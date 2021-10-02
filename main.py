@@ -8,7 +8,7 @@ Created by Sheepy0125
 ### Setup ###
 #############
 # Import
-from setup import CONFIG, pygame, window, clock
+from setup_program import CONFIG, pygame, window, clock
 from tools import Logger, check_running_by_self
 from pygame_tools import Text, Button, CenterRect
 

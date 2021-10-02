@@ -15,7 +15,7 @@ del check_running_by_self
 ### Setup ###
 #############
 # Import
-from setup import CONFIG, pygame, window
+from setup_program import CONFIG, pygame, window
 from tools import Logger
 from typing import Union
 
