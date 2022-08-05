@@ -10,7 +10,7 @@
 		"realtimeConversion": true
 	},
 	"paths": {
-		"fontPath": "Assets/Terminus.ttf",
+		"fontPath": "Assets/DejaVuSansMono.ttf",
 		"buttonImgPath": "Assets/button.png"
 	}
 }

@@ -10,13 +10,19 @@ Created by Sheepy0125
 # Import
 from setup_program import CONFIG, pygame, window, clock
 from tools import Logger, check_running_by_self
-from pygame_tools import Text, Button, CenterRect
+from pygame_tools import Text, Button, DummyObject
 
 
 ###############
 ### Classes ###
 ###############
-class BinaryInput:
+class BinaryInputParent:
+    minimum_size_per_input: int = 75
+    margin: int = 40
+    y_value: int = 100
+
+
+class BinaryInput(BinaryInputParent):
     """A binary input, accepts 0 and 1"""
 
     def __init__(self, pos: tuple, default_value: int = 0) -> None:
@@ -65,15 +71,15 @@ class BinaryInput:
         self.input_text.draw()
 
 
-class AllBinaryInputs:
+class AllBinaryInputs(BinaryInputParent):
     """Creates and handles all binary inputs"""
 
-    def __init__(self, number_of_inputs: int) -> None:
-        # TODO - use the config V
+    def __init__(self, number_of_inputs: int, initial_value: int = 0) -> None:
         self.number_of_inputs: int = number_of_inputs
+        self.converted_number: int = 0
         self.create_all_inputs()
         self.set_all_inputs(0)
-        self.create_output_text("0")
+        self.create_output_text(f"{initial_value}")
 
     def create_all_inputs(self) -> None:
         """Create the binary inputs, adds it to self.input_list"""
@@ -83,35 +89,33 @@ class AllBinaryInputs:
 
         self.input_list: list = []
 
-        # Hardcoded values, oh well!
-        minimum_size_per_input: int = 75
-        margin: int = 40
-        y_value: int = 100
-
         # Get X values of binary inputs (discount CSS Flexbox)
         # Dear future me, I'm sorry
         starting_x_offset: int = (
-            CONFIG["pygame"]["window_size"][0] // (self.number_of_inputs * 2) + margin
+            CONFIG["pygame"]["window_size"][0] // (self.number_of_inputs * 2)
+            + self.margin
         )
         for input_number in range(self.number_of_inputs):
             x_offset: int = (
                 (
                     (
-                        CONFIG["pygame"]["window_size"][0] - (margin * 2)
+                        CONFIG["pygame"]["window_size"][0] - (self.margin * 2)
                         if CONFIG["pygame"]["window_size"][0]
-                        > minimum_size_per_input * self.number_of_inputs
-                        else minimum_size_per_input * self.number_of_inputs
+                        > self.minimum_size_per_input * self.number_of_inputs
+                        else self.minimum_size_per_input * self.number_of_inputs
                     )
                     // self.number_of_inputs
                 )
                 * input_number
             ) + starting_x_offset
 
-            self.input_list.append(BinaryInput(pos=(x_offset, y_value)))
+            self.input_list.append(BinaryInput(pos=(x_offset, self.y_value)))
 
             # Warning if the window size is too small, for fun you know!
             if (
-                x_offset - (minimum_size_per_input // 2) + minimum_size_per_input
+                x_offset
+                - (self.minimum_size_per_input // 2)
+                + self.minimum_size_per_input
             ) > CONFIG["pygame"]["window_size"][0]:
                 Logger.warn(
                     f"Binary input number {input_number + 1}'s placement is bigger "
@@ -120,6 +124,7 @@ class AllBinaryInputs:
 
     def create_output_text(self, text) -> None:
         """Create output text"""
+
         self.output_text: Text = Text(
             text,
             pos=(CONFIG["pygame"]["window_size"][0] // 2, 250),
@@ -133,14 +138,9 @@ class AllBinaryInputs:
         if CONFIG["options"]["verbose"]:
             Logger.log(f"Setting all inputs to {value}")
 
-        self.binary_digits = [
+        self.binary_digits: list = [
             0 for _ in range(self.number_of_inputs)
         ]  # using `*` can cause weird results
-
-        for binary_input in self.input_list:
-            continue
-            binary_input.set(value)
-            binary_input.update()
 
     def event_handling(self) -> None:
         """Event handling for the inputs"""
@@ -152,9 +152,9 @@ class AllBinaryInputs:
                 # Binary input was pressed, change list
                 self.binary_digits[binary_input_idx] = binary_input.value
 
-            # Realtime conversion
-            if CONFIG["options"]["realtime_conversion"]:
-                self.convert()
+                # Realtime conversion
+                if CONFIG["options"]["realtime_conversion"]:
+                    self.convert()
 
     def convert(self) -> None:
         """Convert the inputs to a base 10 integer"""
@@ -179,16 +179,16 @@ class AllBinaryInputs:
 
 
 ############
-### Main ###
+### Menu ###
 ############
-def main() -> None:
-    """Main program"""
+def menu() -> None:
+    """Menu page"""
 
     if CONFIG["options"]["verbose"]:
-        Logger.log("Running main()!")
+        Logger.log("Running menu()!")
 
     # All binary inputs
-    all_binary_inputs = AllBinaryInputs(
+    all_binary_inputs: AllBinaryInputs = AllBinaryInputs(
         number_of_inputs=CONFIG["options"]["number_of_binary_inputs"]
     )
 
@@ -201,17 +201,23 @@ def main() -> None:
             size=16,
             color="blue",
         ),
-        Text(
-            "Convert",
-            pos=(center_x, CONFIG["pygame"]["window_size"][1] - 100),
-            size=12,
-        ),
     ]
-    convert_button: Button = Button(
-        pos=(center_x, CONFIG["pygame"]["window_size"][1] - 100),
-        size=(300, 50),
-        color="red",
-    )
+
+    if not CONFIG["options"]["realtime_conversion"]:
+        convert_button: Button = Button(
+            pos=(center_x, CONFIG["pygame"]["window_size"][1] - 100),
+            size=(300, 50),
+            color="red",
+        )
+        texts.append(
+            Text(
+                "Convert",
+                pos=(center_x, CONFIG["pygame"]["window_size"][1] - 100),
+                size=12,
+            )
+        )
+    else:
+        convert_button: DummyObject = DummyObject()
 
     # Main loop
     running: bool = True
@@ -247,5 +253,7 @@ def main() -> None:
 ###########
 ### Run ###
 ###########
-if check_running_by_self(__name__, __file__, supposed_to=True, verbose=True):
-    main()
+if check_running_by_self(
+    __name__, __file__, supposed_to=True, verbose=CONFIG["options"]["verbose"]
+):
+    menu()

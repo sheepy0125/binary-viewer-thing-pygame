@@ -22,7 +22,17 @@ from typing import Union
 ###############
 ### Classes ###
 ###############
-class Text:
+class DummyObject:
+    """A dummy object with all methods for classes in this file"""
+
+    def check_pressed(self) -> None:
+        ...
+
+    def draw(self) -> None:
+        ...
+
+
+class Text(DummyObject):
     """Display text for Pygame"""
 
     def __init__(
@@ -42,7 +52,7 @@ class Text:
         window.blit(self.text_surf, self.text_rect)
 
 
-class Button:
+class Button(DummyObject):
     """Display a button for Pygame"""
 
     def __init__(
@@ -95,7 +105,7 @@ class Button:
         self.button_rect.draw()
 
 
-class CenterRect:
+class CenterRect(DummyObject):
     """A Pygame rectangle, but it is centered. Don't ask"""
 
     def __init__(
